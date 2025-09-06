@@ -1,0 +1,49 @@
+This file contains SQL queries that demonstrate the use of Common Table Expressions (CTEs). Queries are based on the Rockbuster Stealth case study.They showcase how to calculate the average payment of the top 5 customers and analyze their distribution across different countries.
+# Average amount paid by the Top 5 Customers
+WITH Top_customers AS (
+    SELECT customer.customer_id, first_name, last_name, city, country,
+           SUM(amount) AS total_amount_paid
+    FROM payment
+    INNER JOIN customer ON payment.customer_id = customer.customer_id
+    INNER JOIN address  ON customer.address_id = address.address_id
+    INNER JOIN city     ON address.city_id = city.city_id
+    INNER JOIN country  ON city.country_id = country.country_id
+    WHERE city IN ('Aurora','Acua','Citrus Heights','Iwaki',
+                   'Ambattur','Shanwei','So Leopoldo',
+                   'Teboksary','Tianjin','Cianjur')
+    GROUP BY customer.customer_id, first_name, last_name, city, country
+    ORDER BY total_amount_paid DESC
+    LIMIT 5
+)
+SELECT AVG(total_amount_paid) AS average_amount_paid
+FROM Top_customers;
+
+# Top 5 Customers per Country
+WITH Top_customers_by_countries AS (
+    SELECT customer.customer_id, first_name, last_name, city, country,
+           SUM(amount) AS total_amount_paid
+    FROM payment
+    INNER JOIN customer ON payment.customer_id = customer.customer_id
+    INNER JOIN address  ON customer.address_id = address.address_id
+    INNER JOIN city     ON address.city_id = city.city_id
+    INNER JOIN country  ON city.country_id = country.country_id
+    WHERE city IN ('Aurora','Acua','Citrus Heights','Iwaki',
+                   'Ambattur','Shanwei','So Leopoldo',
+                   'Teboksary','Tianjin','Cianjur')
+    GROUP BY customer.customer_id, first_name, last_name, city, country
+    ORDER BY total_amount_paid DESC
+    LIMIT 5
+)
+SELECT country.country,
+       COUNT(DISTINCT customer.customer_id) AS all_customer_count,
+       COUNT(DISTINCT Top_customers_by_countries.customer_id) AS top_customer_count
+FROM customer
+INNER JOIN address ON customer.address_id = address.address_id
+INNER JOIN city    ON address.city_id = city.city_id
+INNER JOIN country ON city.country_id = country.country_id
+LEFT JOIN Top_customers_by_countries 
+       ON Top_customers_by_countries.country = country.country
+GROUP BY country.country
+ORDER BY top_customer_count DESC,
+         all_customer_count DESC
+LIMIT 5;
