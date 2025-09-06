@@ -1,0 +1,66 @@
+# This file contains SQL queries that demonstrate the use of Data Cleaning and Data Consistency Checks. Queries are based on the Rockbuster Stealth case study. They showcase how to identify and remove duplicate records, check for non-uniform values, detect missing data and generate summary statistics to ensure the accuracy and reliability of the database.
+
+## Duplicate control in film table
+SELECT film_id, title, description, release_year,
+language_id, rental_duration, rental_rate, length, replacement_cost, rating,
+last_update, special_features, fulltext
+FROM film
+GROUP BY film_id, title, description, release_year,
+language_id, rental_duration, rental_rate, length, replacement_cost, rating,
+last_update, special_features, fulltext
+HAVING COUNT(*) >1;
+
+## Duplicate control in customer table
+SELECT customer_id,store_id, first_name, last_name,
+email,address_id,activebool,create_date, last_update, active
+FROM customer
+GROUP BY customer_id, store_id,first_name, last_name,
+email,address_id,activebool,create_date, last_update, active
+HAVING COUNT(*) >1;
+## Distinct values check in film
+SELECT distinct *
+FROM film
+
+## Distinct values check in customer table
+SELECT distinct customer_id,store_id, first_name, last_name,
+email,address_id,activebool,create_date, last_update, active
+FROM customer
+
+## Null check in film table
+SELECT *
+FROM film
+where film_id is null or
+title is null or
+description is null or
+release_year is null or
+language_id is null or
+rental_duration is null or
+rental_rate is null or
+length is null or
+replacement_cost is null or
+rating is null or
+last_update is null or
+special_features is null or
+fulltext is null;
+
+## Null check in customer table
+SELECT *
+FROM customer
+where customer_id is null or store_id is null or
+first_name is null or last_name is null or
+email is null or address_id is null or
+activebool is null or create_date is null or
+last_update is null or active is null;
+
+## Profiling
+SELECT 'release_year',
+avg(release_year), max(release_year), min(release_year), count(release_year)
+from film
+union all
+select 'rental_duration',
+avg(rental_duration), max(rental_duration), min(rental_duration), count(rental_duration)
+from film
+union all
+select 'rental_rate',
+avg(rental_rate), max(rental_rate), min(rental_rate), count(rental_rate)
+from film
